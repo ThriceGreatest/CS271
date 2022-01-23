@@ -1,0 +1,214 @@
+TITLE Program Template     (template.asm)
+
+; Author: Devin Martin
+; Last Modified:
+; OSU email address: 
+; Course number/section:
+; Assignment Number:                 Due Date:
+; Description:
+
+INCLUDE Irvine32.inc
+
+; (insert constant definitions here)
+
+.data
+
+greeting BYTE "Program 2: Fibonacci ---  Made by Devin Martin", 0
+question_username BYTE "What is your name? ", 0
+respect_user BYTE ", nice to meet you!", 0
+ask_numfib BYTE "Please enter the number of Fibonacci terms to be displayed (enter integer in range [1,46]): ", 0
+
+bully_user BYTE "Enter a valid input, werido!!!", 0
+
+praise_user BYTE "Thank you for cooperating, we will proceed with: ", 0
+
+what_is_happening BYTE "show the way my brother", 0
+out_loop BYTE "we out this bro", 0
+
+username BYTE 50 DUP (?)  ;50 is max length
+
+numfib DWORD ? 
+
+upperbound DWORD 46 ;NEEDS TO BE CONSTANT!! 
+lowerbound DWORD 1	;NEEDS TO BE CONSTANT!! 
+
+n  DWORD 0
+prev_term DWORD ?
+curr_term DWORD ?
+next_term DWORD ?
+
+
+
+; (insert variable definitions here)
+
+.code
+main PROC
+
+
+;!!!
+;!!!
+;every section needs to have a header block explaining its purpose.
+
+introduction:
+	;print our first message
+	mov edx, OFFSET greeting
+	call WriteString
+	call Crlf
+
+display_instructions:
+	;print our second message
+	mov edx, OFFSET question_username
+	call WriteString
+
+
+	;Get String
+	mov ecx, 30
+	mov edx, offset username
+	call ReadString
+
+	;Respect user's name
+	call WriteString
+	mov edx, OFFSET respect_user
+	call WriteString
+	call Crlf
+
+get_input:
+	;Get number of number of terms to display from user
+	mov edx, offset ask_numfib
+	call WriteString
+	call ReadInt
+	
+	;Validate input
+	cmp eax, upperbound  
+	ja wrong		;test upper bound
+
+	cmp eax, lowerbound
+	jb wrong		;test lower bound
+
+
+	jmp youre_free  ;they must've passed my tests!
+
+	wrong:
+
+		mov edx, offset bully_user 
+		call WriteString	
+		call Crlf
+		jmp get_input
+
+	youre_free:
+	
+	
+		mov edx, offset praise_user
+		call WriteString
+	
+
+		;Save input
+		mov numfib, EAX 
+		mov eax, numfib 
+		call WriteDec
+		call Crlf
+
+
+		dec numfib ;I start my counting at zero, so we need numfib - 1
+		mov ecx, numfib ;set coutner for loop
+		jmp Fibonacci
+
+;Calculate fibonacci
+
+
+;set n = 0
+
+
+Fibonacci: 
+
+	;if n = 0...
+	mov eax, n
+	cmp eax, 0
+	je zero
+
+	;We passed zero, 
+	;if n = 1
+	mov eax, n
+	cmp eax, 1
+	je one
+
+	;If not one AND not zero
+	;We use main algorithm
+
+	nth_term:
+
+		mov eax, prev_term
+		add eax, curr_term
+		mov next_term, eax
+		call WriteDec
+		call Crlf
+
+		;setup for next loop
+		
+		mov eax, curr_term		;previous term <-- curent term
+		mov prev_term, eax
+		mov eax, next_term		;current term <-- next_term
+		mov curr_term, eax
+		
+		; !!! n currently represents which term we are printing( counting starts at zero ) !!! 		
+		;n++
+		mov eax, n
+		add eax, 1			;increment + 1
+		mov n, eax			;solution was stored in eax... move to n
+		Loop nth_term
+
+		;If doesnt take the loop, we need to escape!
+		jmp escape
+	
+	zero:
+		mov eax, 1
+		call WriteDec
+		call Crlf
+	
+		mov curr_term, 1 ;Set current term as 1
+					     ;n++
+		
+		add n, 1		;increment + 1
+		mov n, eax		;solution was stored in eax... move to n
+
+		double_jump:
+		Loop Fibonacci
+
+	one:
+		mov eax, 1
+		call WriteDec
+		call Crlf
+	
+		mov curr_term, 1	;Set current term as 1 
+		mov prev_term, 1	;Set previous term as 1
+						
+							;n++
+		mov eax, n
+		add eax, 1			;increment + 1
+		mov n, eax			;solution was stored in eax... move to n
+		jmp double_jump
+
+	
+	
+	
+escape:
+	mov edx, offset out_loop
+	call WriteString
+	
+
+
+
+
+
+;FUN AND EXCITIGN GAMEPLAY COMING OUT of EXOTIC ENGRAMS!!!!!!!!
+
+
+
+; (insert executable instructions here)
+
+	exit	; exit to operating system
+main ENDP
+
+; (insert additional procedures here)
+
+END main
